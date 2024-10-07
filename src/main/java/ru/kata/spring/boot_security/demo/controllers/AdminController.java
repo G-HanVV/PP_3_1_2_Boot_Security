@@ -1,5 +1,7 @@
 package ru.kata.spring.boot_security.demo.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -13,6 +15,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
     private final UserService userService;
 
     @Autowired
@@ -22,6 +25,8 @@ public class AdminController {
 
     @GetMapping(value = "")
     public String showAdmin(ModelMap model, Principal principal){
+        if (principal == null) return "redirect:/login";
+        logger.info("showAdmin{}", principal.getName());
         List<User> users = userService.getUsers();
         model.addAttribute("users", users);
         return "/admin";
@@ -29,35 +34,35 @@ public class AdminController {
 
     @GetMapping (value = "/form")
     public String newUserForm(ModelMap model){
-        System.out.println(" --- newUser");
+        logger.info("newUserForm");
         model.addAttribute("user", new User());
         return "/form";
     }
 
     @PostMapping("/user")
     public String createUser(@ModelAttribute("user") User user){
-        System.out.println(" --- create");
+        logger.info("createUser{}", user.getName());
         userService.add(user);
         return "redirect:/admin";
     }
 
     @GetMapping("/{id}/edit")
     public String editUser(ModelMap model, @PathVariable("id") int id){
-        System.out.println(" --- editUser");
+        logger.info("editUser{}", id);
         model.addAttribute("user", userService.getUser(id));
         return "edit";
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public String updateUser(@ModelAttribute("user") User user, @PathVariable("id") int id){
-        System.out.println(" --- updateUser");
+        logger.info("updateUser{}", user.getName());
         userService.updateUser(user);
         return "redirect:/admin";
     }
 
     @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable("id") int id){
-        System.out.println(" --- deleteUser");
+        logger.info("deleteUser{}", id);
         userService.deleteUser(id);
         return "redirect:/admin";
     }
